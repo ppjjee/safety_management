@@ -10,3 +10,4 @@ matplotlib==3.5.0
 scikit-learn==0.24.2
 scikit-image
 efficientnet
+typing-extensions==3.10
