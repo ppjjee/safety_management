@@ -20,15 +20,19 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import *
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam, RMSprop
-from tensorflow.keras import optimizerss
+from tensorflow.keras import optimizers
 from tensorflow.keras.models import load_model
 from tensorflow.keras.callbacks import ReduceLROnPlateau
 from tensorflow.keras.callbacks import LambdaCallback
 from tensorflow.keras import preprocessing
 from sklearn.metrics import classification_report, confusion_matrix
 from PIL import Image
+from sftp import SFTP
 
 os.environ['CUDA_VISIBLE_DEVICES']='0'
+
+sftp = SFTP(st.secrets["HOSTNAME"], st.secrets["USERNAME"], st.secrets["PASSWORD"])
+
 
 def load_image():
     uploaded_file = st.file_uploader(label='Pick an image to test')
@@ -41,6 +45,9 @@ def load_image():
 
     
 def load_model():
+    remoteFilePath = '/nas2/epark/safety_management_git/total_EfficientNetB4_revision.h5'
+    localFilePath = 'total_EfficientNetB4_revision.h5'
+    sftp.download(remoteFilePath, localFilePath)
     model = efc.EfficientNetB4(weights="imagenet", include_top=False, input_shape=(224, 224, 3))
     seed = 1200
     new_model = Sequential([
@@ -52,7 +59,7 @@ def load_model():
 
          keras.layers.Dense(9,name='dense_top', activation='sigmoid')])
 
-    new_model.load_weights('total_EfficientNetB4_revision.h5')
+    new_model.load_weights(localFilePath)
     new_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['acc'])
 
     return new_model
@@ -90,6 +97,9 @@ def predict(model, image):
  
 
 def main():
+    remoteFilePath2 = '/nas2/epark/safety_management_git/category_label.csv'
+    localFilePath2 = 'category_label.csv'
+    sftp.download(remoteFilePath2, localFilePath2)
     st.title('Safety management pretrained model demo')
     model = load_model()
     image = load_image()
@@ -99,7 +109,7 @@ def main():
         predict(model, image)
     st.subheader("Class 정보")
 
-    df = pd.read_csv("category_label.csv")
+    df = pd.read_csv(localFilePath2)
     st.write(df)
 
 
