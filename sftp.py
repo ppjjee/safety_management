@@ -13,8 +13,8 @@ class SFTP():
         cnopts.hostkeys = None
         self.sftp = pysftp.Connection(host = hostname, username = username, password = password, cnopts = cnopts)
         print("connection successfully established...")
-        if not os.path.exists(self.dirModel):
-            os.makedirs(self.dirModel)
+        # if not os.path.exists(self.dirModel):
+        #     os.makedirs(self.dirModel)
         
     def upload(self, localFilePath, remoteFilePath):
         if not os.path.exists(localFilePath):
